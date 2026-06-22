@@ -379,7 +379,6 @@ export default function DailyFortune() {
       </footer>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap');
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         @keyframes pulse { 0%,100% { opacity:0.5; } 50% { opacity:0.8; } }
         * { box-sizing:border-box; margin:0; padding:0; }
