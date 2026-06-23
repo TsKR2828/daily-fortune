@@ -197,10 +197,6 @@ function gradeColor(g) {
 export default function DailyFortune() {
   const [phase, setPhase] = useState("idle"); // idle | revealing | done
   const [progress, setProgress] = useState(0);
-  const [today] = useState(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  });
   const [result, setResult] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [tab, setTab] = useState("hexagram"); // hexagram | sign
@@ -215,12 +211,13 @@ export default function DailyFortune() {
       setProgress(p);
       if (p >= 100) {
         clearInterval(iv);
-        const r = dailyRng(today);
-        setResult({ hex: HEXAGRAMS[r.hexIdx], sign: SIGNS[r.signIdx] });
+        const hexIdx = Math.floor(Math.random() * 64);
+        const signIdx = Math.floor(Math.random() * 100);
+        setResult({ hex: HEXAGRAMS[hexIdx], sign: SIGNS[signIdx] });
         setTimeout(() => setPhase("done"), 300);
       }
     }, 25);
-  }, [phase, today]);
+  }, [phase]);
 
   const reset = useCallback(() => {
     setPhase("idle");
@@ -368,7 +365,7 @@ export default function DailyFortune() {
               返 回
             </button>
             <div style={{ fontSize:11, opacity:0.5, textAlign:"center" }}>
-              同一日期結果固定・隨日更替
+              每次求卦皆為獨立機緣
             </div>
           </div>
         )}
