@@ -186,20 +186,41 @@ function dailyRng(dateStr) {
   return { hexIdx: s1 % 64, signIdx: s2 % 100 };
 }
 
-// ─── 籤等顏色 ───
-function gradeColor(g) {
-  if (g.includes("上")) return "rgba(212,184,150,1)";
-  if (g.includes("下")) return "rgba(212,184,150,0.6)";
-  return "rgba(212,184,150,0.8)";
+// ─── 主題 ───
+const THEMES = {
+  dark: {
+    bg: "#1a1714", fg: "#d4b896", accent: "212,184,150",
+    glow: "radial-gradient(ellipse at 50% 0%,rgba(212,184,150,0.1) 0%,transparent 60%),radial-gradient(ellipse at 50% 100%,rgba(180,140,90,0.06) 0%,transparent 50%)",
+    gradeUp: "rgba(212,184,150,1)", gradeMid: "rgba(212,184,150,0.8)", gradeDown: "rgba(212,184,150,0.6)",
+    ctaBg: "rgba(212,184,150,0.12)", ctaBorder: "rgba(212,184,150,0.4)", ctaColor: "#d4b896",
+  },
+  light: {
+    bg: "#f5f0e8", fg: "#2c2418", accent: "80,60,30",
+    glow: "radial-gradient(ellipse at 50% 0%,rgba(80,60,30,0.03) 0%,transparent 60%),radial-gradient(ellipse at 50% 100%,rgba(80,60,30,0.02) 0%,transparent 50%)",
+    gradeUp: "rgba(60,40,10,1)", gradeMid: "rgba(60,40,10,0.7)", gradeDown: "rgba(60,40,10,0.45)",
+    ctaBg: "rgba(80,60,30,0.1)", ctaBorder: "rgba(80,60,30,0.35)", ctaColor: "#2c2418",
+  },
+};
+
+function gradeColor(g, t) {
+  if (g.includes("上")) return t.gradeUp;
+  if (g.includes("下")) return t.gradeDown;
+  return t.gradeMid;
 }
+
+const LINE_URL = "#"; // TODO: 替換為 LINE 官方帳號連結
 
 // ─── 主元件 ───
 export default function DailyFortune() {
-  const [phase, setPhase] = useState("idle"); // idle | revealing | done
+  const [phase, setPhase] = useState("idle");
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
-  const [tab, setTab] = useState("hexagram"); // hexagram | sign
+  const [tab, setTab] = useState("hexagram");
+  const [mode, setMode] = useState("dark");
+
+  const t = THEMES[mode];
+  const a = t.accent;
 
   const reveal = useCallback(() => {
     if (phase !== "idle") return;
@@ -231,32 +252,39 @@ export default function DailyFortune() {
   const dateDisplay = `${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日　星期${weekdays[d.getDay()]}`;
 
   const S = {
-    root: { minHeight:"100vh", background:"#1a1714", color:"#d4b896", fontFamily:"'Noto Serif TC','Georgia',serif", display:"flex", flexDirection:"column", alignItems:"center", position:"relative", overflow:"hidden" },
-    glow: { position:"fixed", inset:0, pointerEvents:"none", background:"radial-gradient(ellipse at 50% 0%,rgba(212,184,150,0.1) 0%,transparent 60%),radial-gradient(ellipse at 50% 100%,rgba(180,140,90,0.06) 0%,transparent 50%)" },
-    border: { position:"fixed", inset:12, pointerEvents:"none", border:"1px solid rgba(212,184,150,0.2)", borderRadius:2 },
-    borderInner: { position:"absolute", inset:4, border:"1px solid rgba(212,184,150,0.1)" },
+    root: { minHeight:"100vh", background:t.bg, color:t.fg, fontFamily:"'Noto Serif TC','Georgia',serif", display:"flex", flexDirection:"column", alignItems:"center", position:"relative", overflow:"hidden", transition:"background 0.4s, color 0.4s" },
+    glow: { position:"fixed", inset:0, pointerEvents:"none", background:t.glow },
+    border: { position:"fixed", inset:12, pointerEvents:"none", border:`1px solid rgba(${a},0.2)`, borderRadius:2 },
+    borderInner: { position:"absolute", inset:4, border:`1px solid rgba(${a},0.1)` },
     header: { marginTop:40, textAlign:"center", position:"relative", zIndex:1 },
     sub: { fontSize:11, letterSpacing:8, opacity:0.65, fontFamily:"'Cormorant Garamond',Georgia,serif", textTransform:"uppercase", marginBottom:8 },
     title: { fontSize:32, fontWeight:400, margin:0, letterSpacing:10 },
-    divider: { width:60, height:1, background:"linear-gradient(90deg,transparent,#d4b896,transparent)", margin:"12px auto" },
+    divider: { width:60, height:1, background:`linear-gradient(90deg,transparent,${t.fg},transparent)`, margin:"12px auto" },
     date: { fontSize:12, opacity:0.6, letterSpacing:3 },
     main: { flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"24px 20px", width:"100%", maxWidth:420, position:"relative", zIndex:1 },
-    btn: { padding:"14px 48px", background:"transparent", border:"1px solid rgba(212,184,150,0.5)", color:"#d4b896", fontSize:15, fontFamily:"inherit", cursor:"pointer", letterSpacing:6, transition:"all 0.3s" },
-    tab: (active) => ({ padding:"8px 20px", background:active?"rgba(212,184,150,0.1)":"transparent", border:`1px solid rgba(212,184,150,${active?0.5:0.3})`, color:"#d4b896", fontSize:12, fontFamily:"inherit", cursor:"pointer", letterSpacing:3, opacity:active?1:0.65, transition:"all 0.3s" }),
-    card: { width:"100%", padding:"20px", background:"rgba(212,184,150,0.04)", border:"1px solid rgba(212,184,150,0.15)", borderRadius:2 },
+    btn: { padding:"14px 48px", background:"transparent", border:`1px solid rgba(${a},0.5)`, color:t.fg, fontSize:15, fontFamily:"inherit", cursor:"pointer", letterSpacing:6, transition:"all 0.3s" },
+    tab: (active) => ({ padding:"8px 20px", background:active?`rgba(${a},0.1)`:"transparent", border:`1px solid rgba(${a},${active?0.5:0.3})`, color:t.fg, fontSize:12, fontFamily:"inherit", cursor:"pointer", letterSpacing:3, opacity:active?1:0.65, transition:"all 0.3s" }),
+    card: { width:"100%", padding:"20px", background:`rgba(${a},0.04)`, border:`1px solid rgba(${a},0.15)`, borderRadius:2 },
     label: { fontSize:11, letterSpacing:3, opacity:0.55, textAlign:"center", marginBottom:10 },
     poem: { fontSize:14, lineHeight:2.2, textAlign:"center", letterSpacing:2 },
     interp: { fontSize:13, lineHeight:2, opacity:0.85, textAlign:"center", letterSpacing:2 },
     detailGrid: { display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"8px 12px", fontSize:12, opacity:0.8 },
-    detailItem: { display:"flex", justifyContent:"space-between", padding:"4px 0", borderBottom:"1px solid rgba(212,184,150,0.1)" },
+    detailItem: { display:"flex", justifyContent:"space-between", padding:"4px 0", borderBottom:`1px solid rgba(${a},0.1)` },
     footer: { paddingBottom:24, textAlign:"center", position:"relative", zIndex:1 },
-    footerBadge: { display:"inline-block", padding:"6px 12px", border:"1.5px solid rgba(212,184,150,0.3)", fontSize:11, letterSpacing:4, opacity:0.5, transform:"rotate(-1deg)" },
+    footerBadge: { display:"inline-block", padding:"6px 12px", border:`1.5px solid rgba(${a},0.3)`, fontSize:11, letterSpacing:4, opacity:0.5, transform:"rotate(-1deg)" },
+    cta: { display:"block", padding:"14px 28px", background:t.ctaBg, border:`1px solid ${t.ctaBorder}`, borderRadius:2, color:t.ctaColor, fontSize:14, fontFamily:"inherit", textDecoration:"none", letterSpacing:4, textAlign:"center", transition:"all 0.3s", cursor:"pointer" },
+    toggle: { position:"fixed", top:20, right:20, zIndex:10, background:"transparent", border:`1px solid rgba(${a},0.3)`, color:t.fg, width:36, height:36, borderRadius:"50%", cursor:"pointer", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.3s", fontFamily:"inherit" },
   };
 
   return (
     <div style={S.root}>
       <div style={S.glow} />
       <div style={S.border}><div style={S.borderInner} /></div>
+
+      <button style={S.toggle} onClick={() => setMode(m => m === "dark" ? "light" : "dark")}
+        title={mode === "dark" ? "切換宣紙模式" : "切換夜幕模式"}>
+        {mode === "dark" ? "☀" : "☾"}
+      </button>
 
       <header style={S.header}>
         <div style={S.sub}>Ex Libris Divinatio</div>
@@ -272,8 +300,8 @@ export default function DailyFortune() {
               靜心合十<br/>敬請文殊菩薩<br/>佐以周易卜筮<br/>示今日運勢
             </div>
             <button onClick={reveal} style={S.btn}
-              onMouseEnter={e=>{e.target.style.background="rgba(212,184,150,0.1)";e.target.style.borderColor="rgba(212,184,150,0.6)";}}
-              onMouseLeave={e=>{e.target.style.background="transparent";e.target.style.borderColor="rgba(212,184,150,0.4)";}}>
+              onMouseEnter={e=>{e.target.style.background=`rgba(${a},0.1)`;e.target.style.borderColor=`rgba(${a},0.6)`;}}
+              onMouseLeave={e=>{e.target.style.background="transparent";e.target.style.borderColor=`rgba(${a},0.4)`;}}>
               求 今 日 運 勢
             </button>
           </div>
@@ -284,15 +312,14 @@ export default function DailyFortune() {
             <div style={{ fontSize:13, opacity:0.7, letterSpacing:4, animation:"pulse 2s ease-in-out infinite" }}>
               {progress < 40 ? "蓍 草 演 算 中 ⋯" : progress < 70 ? "文 殊 菩 薩 降 示 ⋯" : "卦 簽 合 成 中 ⋯"}
             </div>
-            <div style={{ width:200, height:2, background:"rgba(212,184,150,0.15)", borderRadius:1, overflow:"hidden" }}>
-              <div style={{ width:`${progress}%`, height:"100%", background:"rgba(212,184,150,0.5)", transition:"width 0.1s" }} />
+            <div style={{ width:200, height:2, background:`rgba(${a},0.15)`, borderRadius:1, overflow:"hidden" }}>
+              <div style={{ width:`${progress}%`, height:"100%", background:`rgba(${a},0.5)`, transition:"width 0.1s" }} />
             </div>
           </div>
         )}
 
         {phase === "done" && result && (
           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:16, animation:"fadeIn 0.8s ease", width:"100%" }}>
-            {/* Tab 切換 */}
             <div style={{ display:"flex", gap:8 }}>
               <button style={S.tab(tab==="hexagram")} onClick={()=>setTab("hexagram")}>周 易 卦</button>
               <button style={S.tab(tab==="sign")} onClick={()=>setTab("sign")}>文 殊 簽</button>
@@ -326,7 +353,7 @@ export default function DailyFortune() {
                   <div style={{ fontSize:16, letterSpacing:4, marginBottom:6 }}>
                     第 {result.sign.num} 簽
                   </div>
-                  <div style={{ fontSize:14, color:gradeColor(result.sign.grade), letterSpacing:3 }}>
+                  <div style={{ fontSize:14, color:gradeColor(result.sign.grade, t), letterSpacing:3 }}>
                     {result.sign.grade}
                   </div>
                 </div>
@@ -337,7 +364,7 @@ export default function DailyFortune() {
                     return parts.map((p,j) => <div key={`${i}-${j}`}>{p}{j<parts.length-1||i<arr.length-1 ? (seg.includes("。")?"。":"，") : "。"}</div>);
                   })}
                 </div>
-                <div style={{ margin:"16px 0 12px", padding:"12px", background:"rgba(212,184,150,0.04)", borderRadius:2 }}>
+                <div style={{ margin:"16px 0 12px", padding:"12px", background:`rgba(${a},0.04)`, borderRadius:2 }}>
                   <div style={{ ...S.label, marginBottom:6 }}>解 曰</div>
                   <div style={S.interp}>{result.sign.interpret}</div>
                 </div>
@@ -359,10 +386,16 @@ export default function DailyFortune() {
               </div>
             )}
 
+            <a href={LINE_URL} target="_blank" rel="noopener noreferrer" style={S.cta}
+              onMouseEnter={e=>{e.target.style.background=`rgba(${a},0.18)`;e.target.style.borderColor=`rgba(${a},0.6)`;}}
+              onMouseLeave={e=>{e.target.style.background=t.ctaBg;e.target.style.borderColor=t.ctaBorder;}}>
+              詢問順周堂真人解卦
+            </a>
+
             <button onClick={reset} style={{ ...S.btn, padding:"10px 32px", fontSize:13, letterSpacing:4 }}
-              onMouseEnter={e=>e.target.style.background="rgba(212,184,150,0.08)"}
+              onMouseEnter={e=>e.target.style.background=`rgba(${a},0.08)`}
               onMouseLeave={e=>e.target.style.background="transparent"}>
-              返 回
+              再 求 一 次
             </button>
             <div style={{ fontSize:11, opacity:0.5, textAlign:"center" }}>
               每次求卦皆為獨立機緣
