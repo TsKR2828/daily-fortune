@@ -208,7 +208,7 @@ function gradeColor(g, t) {
   return t.gradeMid;
 }
 
-const LINE_URL = "#"; // TODO: 替換為 LINE 官方帳號連結
+const LINE_URL = "https://line.me/ti/p/@yunso";
 
 // ─── 主元件 ───
 export default function DailyFortune() {
