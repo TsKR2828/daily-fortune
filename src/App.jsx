@@ -210,6 +210,15 @@ function gradeColor(g, t) {
 
 const LINE_URL = "https://line.me/ti/p/@yunso";
 
+function formatResult(r) {
+  if (!r) return "";
+  return `【每日一卦一簽】\n\n` +
+    `━━ 周易卦 ━━\n${r.hex.name}　${r.hex.title}\n${r.hex.meaning}\n` +
+    `卦辭：${r.hex.judgement}\n象曰：${r.hex.image}\n${r.hex.vernacular}\n\n` +
+    `━━ 文殊簽 ━━\n第 ${r.sign.num} 簽（${r.sign.grade}）\n${r.sign.poem}\n` +
+    `解曰：${r.sign.interpret}\n\n— 順周堂．易經占卜`;
+}
+
 // ─── 主元件 ───
 export default function DailyFortune() {
   const [phase, setPhase] = useState("idle");
@@ -218,6 +227,7 @@ export default function DailyFortune() {
   const [showDetail, setShowDetail] = useState(false);
   const [tab, setTab] = useState("hexagram");
   const [mode, setMode] = useState("dark");
+  const [copied, setCopied] = useState(false);
 
   const t = THEMES[mode];
   const a = t.accent;
@@ -245,6 +255,7 @@ export default function DailyFortune() {
     setResult(null);
     setShowDetail(false);
     setTab("hexagram");
+    setCopied(false);
   }, []);
 
   const weekdays = ["日","一","二","三","四","五","六"];
@@ -386,11 +397,22 @@ export default function DailyFortune() {
               </div>
             )}
 
-            <a href={LINE_URL} target="_blank" rel="noopener noreferrer" style={S.cta}
+            <button onClick={()=>{
+                navigator.clipboard.writeText(formatResult(result)).then(()=>{
+                  setCopied(true);
+                  setTimeout(()=>setCopied(false),3000);
+                  window.open(LINE_URL,"_blank","noopener,noreferrer");
+                });
+              }} style={S.cta}
               onMouseEnter={e=>{e.target.style.background=`rgba(${a},0.18)`;e.target.style.borderColor=`rgba(${a},0.6)`;}}
               onMouseLeave={e=>{e.target.style.background=t.ctaBg;e.target.style.borderColor=t.ctaBorder;}}>
               詢問順周堂真人解卦
-            </a>
+            </button>
+            {copied && (
+              <div style={{ fontSize:12, color:t.gradeUp, textAlign:"center", animation:"fadeIn 0.3s ease" }}>
+                占卜結果已複製，請於聊天室貼上
+              </div>
+            )}
 
             <button onClick={reset} style={{ ...S.btn, padding:"10px 32px", fontSize:13, letterSpacing:4 }}
               onMouseEnter={e=>e.target.style.background=`rgba(${a},0.08)`}
