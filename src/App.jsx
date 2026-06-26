@@ -400,8 +400,8 @@ export default function DailyFortune() {
             <button onClick={()=>{
                 navigator.clipboard.writeText(formatResult(result)).then(()=>{
                   setCopied(true);
+                  setTimeout(()=>{ window.open(LINE_URL,"_blank","noopener,noreferrer"); },1500);
                   setTimeout(()=>setCopied(false),3000);
-                  window.open(LINE_URL,"_blank","noopener,noreferrer");
                 });
               }} style={S.cta}
               onMouseEnter={e=>{e.target.style.background=`rgba(${a},0.18)`;e.target.style.borderColor=`rgba(${a},0.6)`;}}
