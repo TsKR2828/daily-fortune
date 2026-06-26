@@ -408,11 +408,6 @@ export default function DailyFortune() {
               onMouseLeave={e=>{e.target.style.background=t.ctaBg;e.target.style.borderColor=t.ctaBorder;}}>
               詢問順周堂真人解卦
             </button>
-            {copied && (
-              <div style={{ fontSize:12, color:t.gradeUp, textAlign:"center", animation:"fadeIn 0.3s ease" }}>
-                占卜結果已複製，請於聊天室貼上
-              </div>
-            )}
 
             <button onClick={reset} style={{ ...S.btn, padding:"10px 32px", fontSize:13, letterSpacing:4 }}
               onMouseEnter={e=>e.target.style.background=`rgba(${a},0.08)`}
@@ -429,6 +424,17 @@ export default function DailyFortune() {
       <footer style={S.footer}>
         <div style={S.footerBadge}>順周堂．易經占卜</div>
       </footer>
+
+      {copied && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:999, animation:"fadeIn 0.25s ease" }}
+          onClick={()=>setCopied(false)}>
+          <div style={{ background:t.bg, border:`1px solid rgba(${a},0.3)`, borderRadius:8, padding:"28px 36px", textAlign:"center", maxWidth:300, boxShadow:"0 8px 32px rgba(0,0,0,0.3)" }}>
+            <div style={{ fontSize:32, marginBottom:12 }}>✓</div>
+            <div style={{ fontSize:15, letterSpacing:2, marginBottom:8, color:t.text }}>占卜結果已複製</div>
+            <div style={{ fontSize:12, opacity:0.6, color:t.text }}>請於 LINE 聊天室貼上</div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
