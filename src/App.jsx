@@ -400,7 +400,7 @@ export default function DailyFortune() {
             <button onClick={()=>{
                 navigator.clipboard.writeText(formatResult(result)).then(()=>{
                   setCopied(true);
-                  setTimeout(()=>{ window.open(LINE_URL,"_blank","noopener,noreferrer"); },1500);
+                  setTimeout(()=>{ window.open(LINE_URL,"_blank","noopener,noreferrer"); },5000);
                   setTimeout(()=>setCopied(false),3000);
                 });
               }} style={S.cta}
